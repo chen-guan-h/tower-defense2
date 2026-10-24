@@ -1,26 +1,30 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <title>塔防遊戲</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模組化 HTML5 塔防遊戲</title>
     <style>
         body {
-            background-color: #222;
-            color: white;
-            text-align: center;
-            margin-top: 50px;
+            background-color: #1a1a1a;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
         }
         canvas {
-            background-color: #333;
-            border: 2px solid #fff;
+            background-color: #34495e;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
-    <h1>塔防遊戲</h1>
-    <canvas id="gameCanvas" width="600" height="400"></canvas>
-
-    <!-- 載入模組化的主程式 -->
-    <script type="module" src="./js/main.js"></script>
+    <canvas id="gameCanvas"></canvas>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
