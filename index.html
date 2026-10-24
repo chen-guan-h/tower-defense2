@@ -3,24 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>模組化 HTML5 塔防遊戲</title>
+    <title>吉依卡哇防衛戰：吉依卡哇 vs 兔子軍團</title>
     <style>
         body {
-            background-color: #1a1a1a;
-            color: #fff;
+            background-color: #2c223b;
+            color: #ffe6f0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            font-family: sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             overflow: auto;
+        }
+        h2 {
+            margin: 5px 0 10px 0;
+            color: #ffb3d9;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
         #stats {
             font-size: 16px;
             font-weight: bold;
             margin-bottom: 8px;
+            background: rgba(255, 182, 193, 0.15);
+            padding: 8px 16px;
+            border-radius: 20px;
         }
         .controls {
             margin-bottom: 8px;
@@ -30,46 +38,57 @@
             padding: 8px 14px;
             margin: 4px;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+        .tower-btn:active {
+            transform: scale(0.95);
         }
         canvas {
-            background-color: #34495e;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
-            border-radius: 8px;
+            background-color: #3d3152;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+            border-radius: 12px;
             max-width: 100%;
             height: auto;
+            border: 4px solid #ff99cc;
         }
         #startWaveBtn {
-            background: #2ecc71;
+            background: #ff66b2;
             color: white;
-            padding: 10px 20px;
+            padding: 10px 24px;
             font-size: 16px;
             border: none;
-            border-radius: 6px;
+            border-radius: 20px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 8px;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(255,102,178,0.4);
+        }
+        #startWaveBtn:hover {
+            background: #ff3399;
         }
     </style>
 </head>
 <body>
 
+    <h2>🌸 吉依卡哇防衛戰 🌸</h2>
     <div id="stats">
-        金錢: <span id="money">150</span> | 生命: <span id="lives">10</span> | 波次: <span id="wave">0/4</span>
+        討伐點數 (金錢): <span id="money">150</span> | 草包栗子酥生命: <span id="lives">10</span> | 波次: <span id="wave">0/4</span>
     </div>
     
     <div class="controls">
-        <button class="tower-btn" data-type="basic" style="background:#3498db;">基礎砲塔 ($50)</button>
-        <button class="tower-btn" data-type="sniper" style="background:#e74c3c;">狙擊塔 ($100)</button>
-        <button class="tower-btn" data-type="splash" style="background:#f1c40f; color:#333;">範圍塔 ($120)</button>
+        <button class="tower-btn" data-type="chiikawa" style="background:#ff99cc; color:#333;">吉依卡哇 (討伐棒) $50</button>
+        <button class="tower-btn" data-type="hachiware" style="background:#66b3ff;">小八貓 (相機閃光) $100</button>
+        <button class="tower-btn" data-type="usagi" style="background:#ffcc00; color:#333;">狂粉吉依卡哇 (呐喊波) $120</button>
     </div>
 
     <canvas id="gameCanvas" width="600" height="400"></canvas>
 
     <div>
-        <button id="startWaveBtn">開始下一波</button>
+        <button id="startWaveBtn">呼叫兔子軍團來襲！</button>
     </div>
 
     <script>
@@ -77,16 +96,18 @@
             TILE_SIZE: 40,
             MAP_WIDTH: 15,
             MAP_HEIGHT: 10,
+            // 防禦塔設定：化身為吉依卡哇主要角色
             TOWERS: {
-                basic: { name: '基礎砲塔', cost: 50, range: 120, damage: 15, fireRate: 600, color: '#3498db' },
-                sniper: { name: '狙擊塔', cost: 100, range: 220, damage: 45, fireRate: 1400, color: '#e74c3c' },
-                splash: { name: '範圍砲塔', cost: 120, range: 90, damage: 25, fireRate: 900, color: '#f1c40f', splashRadius: 60 }
+                chiikawa: { name: '吉依卡哇', cost: 50, range: 120, damage: 18, fireRate: 600, color: '#ff99cc', symbol: 'ちい' },
+                hachiware: { name: '小八貓', cost: 100, range: 220, damage: 50, fireRate: 1300, color: '#66b3ff', symbol: 'ハチ' },
+                usagi: { name: '強悍吉依', cost: 120, range: 90, damage: 30, fireRate: 800, color: '#ffcc00', symbol: 'つよ', splashRadius: 65 }
             },
+            // 敵人設定：化身為瘋狂的兔子軍團與奇美拉
             WAVES: [
-                { count: 8, speed: 1.2, hp: 60, reward: 15, interval: 1200 },
-                { count: 12, speed: 1.5, hp: 100, reward: 20, interval: 1000 },
-                { count: 15, speed: 1.8, hp: 150, reward: 25, interval: 800 },
-                { count: 20, speed: 2.2, hp: 250, reward: 35, interval: 600 }
+                { count: 8, speed: 1.2, hp: 60, reward: 15, interval: 1200, name: '小兔子軍團' },
+                { count: 12, speed: 1.5, hp: 100, reward: 20, interval: 1000, name: '狂吼兔子團' },
+                { count: 15, speed: 1.8, hp: 160, reward: 25, interval: 800, name: '巨型巨大化兔子' },
+                { count: 20, speed: 2.2, hp: 260, reward: 35, interval: 600, name: '終極兔子大軍 (YA-HA!)' }
             ]
         };
 
@@ -99,7 +120,7 @@
                 this.lives = 10;
                 this.currentWave = 0;
                 this.waveInProgress = false;
-                this.selectedTowerType = 'basic';
+                this.selectedTowerType = 'chiikawa';
                 
                 this.towers = [];
                 this.enemies = [];
@@ -108,6 +129,7 @@
                 this.spawnInterval = 1000;
                 this.lastSpawnTime = 0;
                 
+                // 討伐路徑 (草包栗子酥的家)
                 this.path = [
                     { x: 0, y: 2 },
                     { x: 5, y: 2 },
@@ -127,7 +149,7 @@
                     btn.addEventListener('click', (e) => {
                         this.selectedTowerType = e.target.getAttribute('data-type');
                         document.querySelectorAll('.tower-btn').forEach(b => b.style.outline = 'none');
-                        e.target.style.outline = '3px solid #fff';
+                        e.target.style.outline = '3px solid #ff66b2';
                     });
                 });
                 
@@ -175,191 +197,4 @@
                 
                 if (this.money < towerConfig.cost) return;
                 
-                const existing = this.towers.find(t => t.gridX === gridX && t.gridY === gridY);
-                if (existing) return;
-                
-                this.money -= towerConfig.cost;
-                this.updateUI();
-                
-                this.towers.push({
-                    gridX, gridY,
-                    x: gridX * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2,
-                    y: gridY * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2,
-                    ...towerConfig,
-                    lastShot: 0
-                });
-            }
-            
-            loop(time) {
-                const dt = (time - this.lastTime) / 1000;
-                this.lastTime = time;
-                
-                this.update(dt);
-                this.render();
-                
-                requestAnimationFrame((t) => this.loop(t));
-            }
-            
-            update(dt) {
-                const now = performance.now();
-                
-                if (this.spawnQueue.length > 0 && now - this.lastSpawnTime > this.spawnInterval) {
-                    const enemyData = this.spawnQueue.shift();
-                    this.enemies.push({
-                        x: this.path[0].x,
-                        y: this.path[0].y,
-                        pathIndex: 0,
-                        ...enemyData
-                    });
-                    this.lastSpawnTime = now;
-                }
-                
-                for (let i = this.enemies.length - 1; i >= 0; i--) {
-                    const enemy = this.enemies[i];
-                    const targetPoint = this.path[enemy.pathIndex + 1];
-                    
-                    if (!targetPoint) {
-                        this.enemies.splice(i, 1);
-                        this.lives--;
-                        this.updateUI();
-                        if (this.lives <= 0) {
-                            alert('遊戲結束！');
-                            location.reload();
-                        }
-                        continue;
-                    }
-                    
-                    const dx = targetPoint.x - enemy.x;
-                    const dy = targetPoint.y - enemy.y;
-                    const dist = Math.hypot(dx, dy);
-                    const moveDist = enemy.speed * (dt * 60);
-                    
-                    if (dist <= moveDist) {
-                        enemy.x = targetPoint.x;
-                        enemy.y = targetPoint.y;
-                        enemy.pathIndex++;
-                    } else {
-                        enemy.x += (dx / dist) * moveDist;
-                        enemy.y += (dy / dist) * moveDist;
-                    }
-                }
-                
-                if (this.spawnQueue.length === 0 && this.enemies.length === 0 && this.waveInProgress) {
-                    this.waveInProgress = false;
-                    if (this.currentWave >= CONFIG.WAVES.length) {
-                        alert('恭喜通關所有波次！');
-                    }
-                }
-                
-                this.towers.forEach(tower => {
-                    if (now - tower.lastShot > tower.fireRate) {
-                        const target = this.enemies.find(e => Math.hypot(e.x - tower.x, e.y - tower.y) <= tower.range);
-                        if (target) {
-                            this.projectiles.push({
-                                x: tower.x, y: tower.y,
-                                target: target,
-                                damage: tower.damage,
-                                speed: 6,
-                                splashRadius: tower.splashRadius || 0
-                            });
-                            tower.lastShot = now;
-                        }
-                    }
-                });
-                
-                for (let i = this.projectiles.length - 1; i >= 0; i--) {
-                    const p = this.projectiles[i];
-                    if (!this.enemies.includes(p.target)) {
-                        this.projectiles.splice(i, 1);
-                        continue;
-                    }
-                    const dx = p.target.x - p.x;
-                    const dy = p.target.y - p.y;
-                    const dist = Math.hypot(dx, dy);
-                    
-                    if (dist <= p.speed) {
-                        if (p.splashRadius > 0) {
-                            this.enemies.forEach(e => {
-                                if (Math.hypot(e.x - p.target.x, e.y - p.target.y) <= p.splashRadius) {
-                                    e.hp -= p.damage;
-                                }
-                            });
-                        } else {
-                            p.target.hp -= p.damage;
-                        }
-                        this.projectiles.splice(i, 1);
-                    } else {
-                        p.x += (dx / dist) * p.speed;
-                        p.y += (dy / dist) * p.speed;
-                    }
-                }
-                
-                for (let i = this.enemies.length - 1; i >= 0; i--) {
-                    if (this.enemies[i].hp <= 0) {
-                        this.money += this.enemies[i].reward;
-                        this.updateUI();
-                        this.enemies.splice(i, 1);
-                    }
-                }
-            }
-            
-            render() {
-                const ctx = this.ctx;
-                ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                
-                ctx.strokeStyle = '#2c3e50';
-                ctx.lineWidth = 1;
-                for (let x = 0; x < CONFIG.MAP_WIDTH; x++) {
-                    for (let y = 0; y < CONFIG.MAP_HEIGHT; y++) {
-                        ctx.strokeRect(x * CONFIG.TILE_SIZE, y * CONFIG.TILE_SIZE, CONFIG.TILE_SIZE, CONFIG.TILE_SIZE);
-                    }
-                }
-                
-                ctx.strokeStyle = '#bdc3c7';
-                ctx.lineWidth = 20;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-                ctx.beginPath();
-                this.path.forEach((p, index) => {
-                    if (index === 0) ctx.moveTo(p.x, p.y);
-                    else ctx.lineTo(p.x, p.y);
-                });
-                ctx.stroke();
-                
-                this.towers.forEach(t => {
-                    ctx.fillStyle = t.color;
-                    ctx.beginPath();
-                    ctx.arc(t.x, t.y, 16, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.lineWidth = 2;
-                    ctx.strokeStyle = '#fff';
-                    ctx.stroke();
-                });
-                
-                this.enemies.forEach(e => {
-                    ctx.fillStyle = '#e74c3c';
-                    ctx.beginPath();
-                    ctx.arc(e.x, e.y, 12, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    ctx.fillStyle = '#333';
-                    ctx.fillRect(e.x - 14, e.y - 20, 28, 4);
-                    ctx.fillStyle = '#2ecc71';
-                    ctx.fillRect(e.x - 14, e.y - 20, 28 * (e.hp / e.maxHp), 4);
-                });
-                
-                ctx.fillStyle = '#f1c40f';
-                this.projectiles.forEach(p => {
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-                    ctx.fill();
-                });
-            }
-        }
-
-        window.onload = () => {
-            new TowerDefenseGame();
-        };
-    </script>
-</body>
-</html>
+                const existing = this.towers.find(t => t.gridX === gridX && t.gridY === gridY
